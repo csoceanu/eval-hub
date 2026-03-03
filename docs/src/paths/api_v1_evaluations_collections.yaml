@@ -1,5 +1,4 @@
 get:
-  x-internal: true
   tags:
     - Collections
   summary: List Collections

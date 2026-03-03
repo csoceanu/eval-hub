@@ -843,7 +843,6 @@
     },
     "/api/v1/evaluations/collections": {
       "get": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],
@@ -981,7 +980,6 @@
     },
     "/api/v1/evaluations/collections/{id}": {
       "get": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],
