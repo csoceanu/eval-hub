@@ -935,7 +935,6 @@
         }
       },
       "post": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],
@@ -1023,7 +1022,6 @@
         }
       },
       "put": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],
@@ -1077,7 +1075,6 @@
         }
       },
       "patch": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],
@@ -1136,7 +1133,6 @@
         }
       },
       "delete": {
-        "x-internal": true,
         "tags": [
           "Collections"
         ],

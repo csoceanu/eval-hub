@@ -501,6 +501,33 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Collections
+      summary: Create Collection
+      description: Create a new collection.
+      operationId: post_collections
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionConfig'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /api/v1/evaluations/collections/{id}:
     get:
       tags:
@@ -522,6 +549,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CollectionResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Collections
+      summary: Update Collection
+      description: Update an existing collection.
+      operationId: put_collections_id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionConfig'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Collections
+      summary: Patch Collection
+      description: Partially update an existing collection.
+      operationId: patch_collections_id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              title: Json Patch
+              description: JSON Patch operation
+              items:
+                $ref: '#/components/schemas/PatchOperation'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionResource'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Collections
+      summary: Delete Collection
+      description: Delete a collection.
+      operationId: delete_collections_id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Collection Id
+      responses:
+        '204':
+          description: Success
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':

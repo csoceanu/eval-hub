@@ -27,7 +27,6 @@ get:
     '404':
       $ref: ../components/responses/NotFound.yaml
 put:
-  x-internal: true
   tags:
     - Collections
   summary: Update Collection
@@ -62,7 +61,6 @@ put:
     '404':
       $ref: ../components/responses/NotFound.yaml
 patch:
-  x-internal: true
   tags:
     - Collections
   summary: Patch Collection
@@ -101,7 +99,6 @@ patch:
     '404':
       $ref: ../components/responses/NotFound.yaml
 delete:
-  x-internal: true
   tags:
     - Collections
   summary: Delete Collection

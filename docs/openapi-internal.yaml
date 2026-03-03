@@ -629,7 +629,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     post:
-      x-internal: true
       tags:
         - Collections
       summary: Create Collection
@@ -686,7 +685,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     put:
-      x-internal: true
       tags:
         - Collections
       summary: Update Collection
@@ -721,7 +719,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     patch:
-      x-internal: true
       tags:
         - Collections
       summary: Patch Collection
@@ -760,7 +757,6 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
-      x-internal: true
       tags:
         - Collections
       summary: Delete Collection
