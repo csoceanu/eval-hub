@@ -548,6 +548,15 @@ func (tc *scenarioConfig) iWaitForEvaluationJobStatus(expectedStatus string) err
 			} else if status == expectedStatus {
 				return nil
 			} else {
+				// Fail fast when the job has reached any terminal state other than the expected one.
+				if pkgapi.OverallState(status).IsTerminalState() {
+					// Get additional error context from the response for better diagnostics
+					message, _ := tc.getJsonPath("$.status.message.message")
+					if message != "" {
+						return tc.logError(fmt.Errorf("evaluation job reached terminal state %q (expected %q): %s", status, expectedStatus, message))
+					}
+					return tc.logError(fmt.Errorf("evaluation job reached terminal state %q (expected %q)", status, expectedStatus))
+				}
 				lastErr = fmt.Errorf("expected status %q but got %q", expectedStatus, status)
 			}
 		} else if tc.response != nil {
