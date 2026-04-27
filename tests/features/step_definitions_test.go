@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -42,6 +43,15 @@ const (
 	regexpPrefix = "regex:"
 )
 
+// modelEndpointStatus captures preflight outcome from checkModelEndpoint for steps that gate on connectivity.
+type modelEndpointStatus int
+
+const (
+	modelEndpointUnchecked modelEndpointStatus = iota
+	modelEndpointUnreachable
+	modelEndpointReachable
+)
+
 var (
 	// testConfig to be used throughout all the test suites
 	// for the global configuration
@@ -49,6 +59,8 @@ var (
 
 	once   sync.Once
 	logger *log.Logger
+
+	modelEndpointConnectivity modelEndpointStatus
 )
 
 type apiFeature struct {
@@ -1237,6 +1249,56 @@ func tidyUpTests() {
 	}
 }
 
+func checkModelEndpoint() {
+	modelURL := os.Getenv("MODEL_URL")
+	if modelURL == "" {
+		logDebug("MODEL_URL not set, skipping model endpoint pre-flight check\n")
+		return
+	}
+
+	fmt.Printf("Checking model endpoint connectivity: %s\n", modelURL)
+
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				MinVersion:         tls.VersionTLS12,
+				InsecureSkipVerify: true, //nolint:gosec
+			},
+		},
+	}
+
+	resp, err := client.Get(modelURL) //nolint:gosec
+	if err != nil {
+		var dnsErr *net.DNSError
+		if errors.As(err, &dnsErr) {
+			logDebug("WARNING: Cannot resolve model endpoint DNS for %s (test runner may be outside the cluster), proceeding with tests\n", modelURL)
+			return
+		}
+		logDebug("WARNING: Model endpoint %s is not reachable: %v\n", modelURL, err)
+		logDebug("Evaluation job scenarios will be skipped.\n")
+		modelEndpointConnectivity = modelEndpointUnreachable
+		return
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, resp.Body)
+
+	logDebug("Model endpoint %s is reachable (status: %d)\n", modelURL, resp.StatusCode)
+	modelEndpointConnectivity = modelEndpointReachable
+}
+
+func (tc *scenarioConfig) theModelEndpointIsReachable() error {
+	switch modelEndpointConnectivity {
+	case modelEndpointUnreachable:
+		logDebug("Model endpoint is not reachable, skipping evaluation job scenario %s\n", tc.scenarioName)
+		return godog.ErrSkip
+	case modelEndpointUnchecked, modelEndpointReachable:
+		return nil
+	default:
+		return nil
+	}
+}
+
 // A bit of a hack to have some checks that the regexes are working as expected
 func checkRegexes() {
 	tc := createScenarioConfig(api)
@@ -1315,6 +1377,7 @@ func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 
 	ctx.BeforeSuite(setUpTestConf)
 	ctx.BeforeSuite(waitForService)
+	ctx.BeforeSuite(checkModelEndpoint)
 	ctx.AfterSuite(tidyUpTests)
 }
 
@@ -1325,6 +1388,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.After(tc.assetCleanup)
 
 	ctx.Step(`^the service is running$`, tc.theServiceIsRunning)
+	ctx.Step(`^the model endpoint is reachable$`, tc.theModelEndpointIsReachable)
 	ctx.Step(`^there are system providers$`, tc.thereAreSystemProviders)
 	ctx.Step(`^there are system collections$`, tc.thereAreSystemCollections)
 	ctx.Step(`^there is a system collection with id "([^"]*)"$`, tc.thereIsASystemCollectionWithId)
